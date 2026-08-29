@@ -43,7 +43,7 @@ detected recurring payments, cash flow and live conversion rates.
   SPL tokens in a single portfolio.
 - **Two themes, two languages** — dark and light, English and Russian, switched from the sidebar
   and remembered per instance. New languages are one file.
-- **One command to run** — `docker compose up -d`, and the dashboard is on `localhost:8080`.
+- **One command to run** — `docker compose up -d --build`, and the dashboard is on `localhost:8080`.
 
 ---
 
@@ -82,7 +82,7 @@ detected recurring payments, cash flow and live conversion rates.
 git clone https://github.com/SpecFlowdev/climb.git
 cd climb
 cp .env.example .env      # optional — every value already has a default
-docker compose up -d
+docker compose up -d --build
 ```
 
 Open **http://localhost:8080**. The database schema is created on the first start,
@@ -96,6 +96,29 @@ docker compose logs -f app     # follow the API log
 docker compose down            # stop, keep the data
 docker compose down -v         # stop and delete the database volume
 ```
+
+### Updating to a newer version
+
+Always pass `--build`. Plain `docker compose up -d` reuses the image that is
+already on your machine, so you would keep running the old build even after
+pulling new code:
+
+```bash
+git pull
+docker compose up -d --build
+```
+
+If you still see the old interface, the previous image is being reused — force
+a clean rebuild:
+
+```bash
+docker compose down
+docker compose build --no-cache
+docker compose up -d
+```
+
+Your data lives in the `climb-db` volume and survives all of this. To start
+from an empty database as well, add `-v` to `docker compose down`.
 
 ---
 

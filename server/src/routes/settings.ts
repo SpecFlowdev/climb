@@ -43,7 +43,7 @@ settingsRouter.get('/status', async (_req, res) => {
     `SELECT MAX(last_sync)::text AS last FROM wallets`,
   );
   res.json({
-    version: process.env.APP_VERSION ?? '0.1.0',
+    version: process.env.APP_VERSION ?? '0.2.0',
     wallets: wallets?.count ?? 0,
     transactions: txs?.count ?? 0,
     lastSync: lastSync?.last ?? null,

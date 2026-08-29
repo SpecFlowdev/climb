@@ -18,7 +18,10 @@ RUN npm run build
 
 # ------------------------------ runtime image -------------------------------
 FROM node:22-alpine AS runtime
+ARG APP_VERSION=0.2.0
 ENV NODE_ENV=production
+# Surfaced on the Settings page, so you can tell at a glance which build is live.
+ENV APP_VERSION=$APP_VERSION
 WORKDIR /app
 
 COPY server/package*.json ./
