@@ -147,7 +147,7 @@ button.nav-link {
 .nav-link svg { flex: none; }
 
 .sidebar-footer {
-  margin-top: 18px;
+  margin-top: auto;
   padding-top: 14px;
   border-top: 1px solid var(--line-soft);
   display: grid;
