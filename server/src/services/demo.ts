@@ -1,3 +1,4 @@
+import { config } from '../config.js';
 import { query } from '../db.js';
 import { recomputeBalances } from './sync.js';
 
@@ -38,6 +39,13 @@ const PLAN: DemoTx[] = [
 ];
 
 const WALLET_FOR: Record<string, number> = { BTC: 0, ETH: 1, USDT: 2 };
+
+/** Seeded so the dashboard has real-looking numbers even before the first live price fetch. */
+const DEMO_PRICES: Array<{ asset: string; price: number; change24h: number }> = [
+  { asset: 'BTC', price: 71400, change24h: 2.35 },
+  { asset: 'ETH', price: 3820, change24h: -1.12 },
+  { asset: 'USDT', price: 1, change24h: 0 },
+];
 
 export async function seedDemoData(): Promise<boolean> {
   const existing = await query<{ count: number }>(`SELECT COUNT(*)::int AS count FROM wallets`);
@@ -89,5 +97,15 @@ export async function seedDemoData(): Promise<boolean> {
   for (const walletId of walletIds) {
     await recomputeBalances(walletId);
   }
+
+  for (const row of DEMO_PRICES) {
+    await query(
+      `INSERT INTO prices (asset, currency, price, change_24h, updated_at)
+       VALUES ($1,$2,$3,$4, now())
+       ON CONFLICT (asset, currency) DO NOTHING`,
+      [row.asset, config.baseCurrency, row.price, row.change24h],
+    );
+  }
+
   return true;
 }

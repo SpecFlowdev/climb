@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { config } from '../config.js';
-import { coinIdFor, isStable, marketChart, priceMap, refreshPrices } from '../services/prices.js';
+import { coinIdFor, isStable, marketChart, priceMap, priceOf, refreshPrices } from '../services/prices.js';
 import { query } from '../db.js';
 
 export const marketRouter = Router();
@@ -36,9 +36,33 @@ marketRouter.get('/chart', async (req, res) => {
     const raw = await marketChart(coinId, days);
     res.json({ asset, days, points: raw.map(([t, p]) => ({ t, p })) });
   } catch (error) {
+    if (config.demoMode) {
+      const base = await priceOf(asset);
+      if (base) return res.json({ asset, days, points: syntheticSeries(asset, base, days) });
+    }
     res.status(502).json({ error: (error as Error).message });
   }
 });
+
+/**
+ * Offline fallback for demo installs: a deterministic random walk ending at the
+ * current seeded price, so the chart isn't blank when the market API is unreachable.
+ */
+function syntheticSeries(asset: string, endPrice: number, days: number): Array<{ t: number; p: number }> {
+  let seed = [...asset].reduce((sum, char) => sum + char.charCodeAt(0), 7);
+  const next = () => {
+    seed = (seed * 1103515245 + 12345) & 0x7fffffff;
+    return seed / 0x7fffffff;
+  };
+  const walk: number[] = [endPrice];
+  for (let i = 1; i < days; i += 1) {
+    const drift = (next() - 0.5) * 0.05;
+    walk.push(walk[i - 1] / (1 + drift));
+  }
+  walk.reverse();
+  const now = Date.now();
+  return walk.map((p, index) => ({ t: now - (days - index) * 86_400_000, p: Math.max(p, 0) }));
+}
 
 marketRouter.get('/convert', async (req, res) => {
   const from = String(req.query.from ?? 'BTC').toUpperCase();
