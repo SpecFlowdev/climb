@@ -102,6 +102,27 @@ CREATE TABLE IF NOT EXISTS prices (
   PRIMARY KEY (asset, currency)
 );
 
+CREATE TABLE IF NOT EXISTS budgets (
+  id          SERIAL PRIMARY KEY,
+  category_id INT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+  amount      NUMERIC(18,2) NOT NULL CHECK (amount > 0),
+  period      TEXT NOT NULL DEFAULT 'month' CHECK (period IN ('month','year')),
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (category_id, period)
+);
+
+CREATE TABLE IF NOT EXISTS goals (
+  id          SERIAL PRIMARY KEY,
+  title       TEXT NOT NULL,
+  /* Either accumulate a number of coins, or a fiat value. */
+  asset       TEXT,
+  target      NUMERIC(38,12) NOT NULL CHECK (target > 0),
+  deadline    DATE,
+  color       TEXT NOT NULL DEFAULT '#34d399',
+  archived    BOOLEAN NOT NULL DEFAULT FALSE,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
 CREATE TABLE IF NOT EXISTS settings (
   key   TEXT PRIMARY KEY,
   value JSONB NOT NULL

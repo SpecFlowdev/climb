@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import type { ReactNode } from 'react';
+import type { CSSProperties, ReactNode } from 'react';
 import { useApp } from '../app-context';
 
 export function Card({
@@ -26,9 +26,21 @@ export function Card({
   );
 }
 
-export function Money({ children, className = '' }: { children: ReactNode; className?: string }) {
+export function Money({
+  children,
+  className = '',
+  style,
+}: {
+  children: ReactNode;
+  className?: string;
+  style?: CSSProperties;
+}) {
   const { privacy } = useApp();
-  return <span className={`${className} ${privacy ? 'blurred' : ''}`.trim()}>{children}</span>;
+  return (
+    <span className={`${className} ${privacy ? 'blurred' : ''}`.trim()} style={style}>
+      {children}
+    </span>
+  );
 }
 
 export function StatCard({

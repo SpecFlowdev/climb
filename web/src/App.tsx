@@ -2,8 +2,12 @@ import { Route, Routes } from 'react-router-dom';
 import { Layout } from './components/Layout';
 import { Toasts } from './components/ui';
 import { AnalyticsPage } from './pages/Analytics';
+import { AssetDetailPage } from './pages/AssetDetail';
+import { BudgetsPage } from './pages/Budgets';
 import { CategoriesPage } from './pages/Categories';
 import { ConvertPage } from './pages/Convert';
+import { GoalsPage } from './pages/Goals';
+import { RecurringPage } from './pages/Recurring';
 import { Dashboard } from './pages/Dashboard';
 import { PortfolioPage } from './pages/Portfolio';
 import { RulesPage } from './pages/Rules';
@@ -18,6 +22,10 @@ export function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/assets/:symbol" element={<AssetDetailPage />} />
+        <Route path="/budgets" element={<BudgetsPage />} />
+        <Route path="/goals" element={<GoalsPage />} />
+        <Route path="/recurring" element={<RecurringPage />} />
         <Route path="/transactions" element={<TransactionsPage />} />
         <Route path="/wallets" element={<WalletsPage />} />
         <Route path="/categories" element={<CategoriesPage />} />

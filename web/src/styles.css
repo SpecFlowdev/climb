@@ -500,3 +500,56 @@ button.nav-link {
 
 .spin { animation: spin 0.9s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
+
+.nav-groups { display: grid; gap: 16px; }
+.nav-group { display: grid; gap: 2px; }
+.nav-group-label {
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 650;
+  padding: 0 12px 6px;
+  opacity: 0.75;
+}
+
+.budget-track {
+  position: relative;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--panel-3);
+  overflow: visible;
+}
+.budget-fill {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.budget-marker {
+  position: absolute;
+  top: -4px;
+  width: 2px;
+  height: 16px;
+  border-radius: 2px;
+  background: var(--text-dim);
+  opacity: 0.7;
+}
+
+.goal-ring-row { display: flex; align-items: center; gap: 18px; margin-top: 16px; }
+.goal-ring { position: relative; width: 84px; height: 84px; flex: none; }
+.goal-ring-value {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+}
+
+.asset-link { color: inherit; }
+.asset-link:hover strong { color: var(--accent); }
+
+a.list-item { color: inherit; cursor: pointer; }
+a.list-item:hover .title { color: var(--accent); }

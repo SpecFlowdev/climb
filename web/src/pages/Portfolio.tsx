@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Coins } from 'lucide-react';
-import type { Portfolio as PortfolioData } from '../api';
+import { ChevronRight, Coins } from 'lucide-react';
+import type { AssetsResponse, Portfolio as PortfolioData } from '../api';
 import { useApp } from '../app-context';
 import { Donut, TrendArea } from '../components/charts';
 import { PageHeader } from '../components/Layout';
@@ -13,7 +13,8 @@ import { useI18n } from '../i18n';
 export function PortfolioPage() {
   const { t } = useI18n();
   const { currency, settings } = useApp();
-  const { data, loading } = useApi<PortfolioData>('/stats/portfolio');
+  const { data, loading } = useApi<AssetsResponse>('/assets');
+  const breakdown = useApi<PortfolioData>('/stats/portfolio');
   const networth = useApi<Array<{ date: string; value: number }>>('/stats/networth?days=180');
 
   const assets = useMemo(() => {
@@ -32,26 +33,38 @@ export function PortfolioPage() {
     value: point.value,
   }));
 
+  const totalPnl = (data?.unrealized ?? 0) + (data?.realized ?? 0);
+
   return (
     <>
       <PageHeader title={t('portfolio.title')} subtitle={t('portfolio.subtitle')} />
       <div className="page">
-        <div className="grid cols-3">
+        <div className="grid cols-4">
           <StatCard
             label={t('portfolio.total')}
             value={formatMoney(data?.total ?? 0, currency)}
-            hint={t('portfolio.assets') + `: ${assets.length}`}
+            hint={`${assets.length} ${t('portfolio.assets').toLowerCase()}`}
           />
           <StatCard
-            label={t('portfolio.change24h')}
-            value={formatMoney(data?.change24h ?? 0, currency)}
-            hint={formatPercent(data?.changePercent24h ?? 0)}
-            tone={(data?.change24h ?? 0) >= 0 ? 'positive' : 'negative'}
+            label={t('pnl.invested')}
+            value={formatMoney(data?.costBasis ?? 0, currency)}
+            hint={t('pnl.investedHint')}
           />
           <StatCard
-            label={t('portfolio.byChain')}
-            value={String(data?.chains.length ?? 0)}
-            hint={(data?.chains ?? []).map((chain) => chain.chain).join(', ') || '—'}
+            label={t('pnl.unrealized')}
+            value={`${(data?.unrealized ?? 0) >= 0 ? '+' : ''}${formatMoney(data?.unrealized ?? 0, currency)}`}
+            hint={
+              (data?.costBasis ?? 0) > 0
+                ? formatPercent(((data?.unrealized ?? 0) / (data?.costBasis ?? 1)) * 100)
+                : t('pnl.unrealizedHint')
+            }
+            tone={(data?.unrealized ?? 0) >= 0 ? 'positive' : 'negative'}
+          />
+          <StatCard
+            label={t('pnl.realized')}
+            value={`${(data?.realized ?? 0) >= 0 ? '+' : ''}${formatMoney(data?.realized ?? 0, currency)}`}
+            hint={`${t('pnl.total')}: ${totalPnl >= 0 ? '+' : ''}${formatMoney(totalPnl, currency)}`}
+            tone={(data?.realized ?? 0) >= 0 ? 'positive' : 'negative'}
           />
         </div>
 
@@ -87,24 +100,30 @@ export function PortfolioPage() {
           </Card>
         </div>
 
-        <Card title={t('portfolio.holdings')} className="pad-0">
+        <Card
+          title={t('portfolio.holdings')}
+          action={<span className="hint">{t('pnl.method')}</span>}
+          className="pad-0"
+        >
           <div className="table-wrap">
             <table className="table">
               <thead>
                 <tr>
                   <th>{t('common.asset')}</th>
-                  <th>{t('common.amount')}</th>
-                  <th>{t('common.price')}</th>
-                  <th>{t('portfolio.change24h')}</th>
-                  <th>{t('common.value')}</th>
-                  <th style={{ width: 180 }}>{t('common.share')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('common.amount')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('pnl.avgCost')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('common.price')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('common.value')}</th>
+                  <th style={{ textAlign: 'right' }}>{t('pnl.unrealized')}</th>
+                  <th style={{ width: 150 }}>{t('common.share')}</th>
+                  <th />
                 </tr>
               </thead>
               <tbody>
                 {assets.map((asset, index) => (
                   <tr key={asset.asset}>
                     <td>
-                      <div className="row">
+                      <Link to={`/assets/${asset.asset}`} className="row asset-link">
                         <span
                           className="chip"
                           style={{
@@ -117,28 +136,47 @@ export function PortfolioPage() {
                           {asset.asset.slice(0, 3)}
                         </span>
                         <strong>{asset.asset}</strong>
-                      </div>
+                      </Link>
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'right' }}>
                       <Money>{formatCrypto(asset.amount, asset.asset)}</Money>
                     </td>
-                    <td>{formatMoney(asset.price, currency)}</td>
-                    <td className={(asset.change24h ?? 0) >= 0 ? 'pos' : 'neg'}>
-                      {formatPercent(asset.change24h)}
+                    <td style={{ textAlign: 'right' }} className="dim">
+                      {formatMoney(asset.avgCost, currency)}
                     </td>
-                    <td>
+                    <td style={{ textAlign: 'right' }}>
+                      {formatMoney(asset.price, currency)}
+                      <div className={`meta ${(asset.change24h ?? 0) >= 0 ? 'pos' : 'neg'}`}>
+                        {formatPercent(asset.change24h)}
+                      </div>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
                       <Money className="amount">{formatMoney(asset.value, currency)}</Money>
+                    </td>
+                    <td style={{ textAlign: 'right' }}>
+                      <Money className={`amount ${asset.unrealized >= 0 ? 'pos' : 'neg'}`}>
+                        {asset.unrealized >= 0 ? '+' : ''}
+                        {formatMoney(asset.unrealized, currency)}
+                      </Money>
+                      <div className={`meta ${asset.unrealized >= 0 ? 'pos' : 'neg'}`}>
+                        {formatPercent(asset.unrealizedPercent)}
+                      </div>
                     </td>
                     <td>
                       <div className="row" style={{ gap: 10 }}>
                         <div style={{ flex: 1 }}>
                           <Progress
-                            value={asset.share}
+                            value={asset.share ?? 0}
                             color={CHART_COLORS[index % CHART_COLORS.length]}
                           />
                         </div>
-                        <span className="dim">{asset.share.toFixed(1)}%</span>
+                        <span className="dim">{(asset.share ?? 0).toFixed(1)}%</span>
                       </div>
+                    </td>
+                    <td>
+                      <Link className="btn ghost icon" to={`/assets/${asset.asset}`}>
+                        <ChevronRight size={15} />
+                      </Link>
                     </td>
                   </tr>
                 ))}
@@ -150,7 +188,7 @@ export function PortfolioPage() {
         <div className="grid cols-2">
           <Card title={t('portfolio.byChain')}>
             <div className="list">
-              {(data?.chains ?? []).map((chain, index) => (
+              {(breakdown.data?.chains ?? []).map((chain, index) => (
                 <div className="list-item" key={chain.chain}>
                   <div style={{ flex: 1 }}>
                     <div className="title" style={{ textTransform: 'capitalize' }}>
@@ -170,9 +208,12 @@ export function PortfolioPage() {
           </Card>
           <Card title={t('portfolio.byWallet')}>
             <div className="list">
-              {(data?.wallets ?? []).map((wallet) => (
+              {(breakdown.data?.wallets ?? []).map((wallet) => (
                 <div className="list-item" key={wallet.id}>
-                  <span className="chip" style={{ background: `${wallet.color}22`, color: wallet.color }}>
+                  <span
+                    className="chip"
+                    style={{ background: `${wallet.color}22`, color: wallet.color }}
+                  >
                     ●
                   </span>
                   <div style={{ flex: 1 }}>

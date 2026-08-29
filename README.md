@@ -9,8 +9,9 @@
 ### A self-hosted dashboard for tracking crypto wallets, spending and net worth
 
 Connect any **public** address — Bitcoin, Ethereum, Polygon, Arbitrum, Base, Optimism, TRON, Solana —
-and Climb turns raw on-chain activity into a finance dashboard: income, expenses, categories,
-cash flow, portfolio allocation and live conversion rates.
+and Climb turns raw on-chain activity into a finance dashboard: **FIFO cost basis and realized /
+unrealized P&L**, spending by category, budgets, savings goals, detected recurring payments,
+cash flow and live conversion rates.
 
 <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2ecc8f?style=flat-square&logo=docker&logoColor=white" />
 <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-5b8def?style=flat-square&logo=postgresql&logoColor=white" />
@@ -28,12 +29,16 @@ cash flow, portfolio allocation and live conversion rates.
 
 ## Why Climb
 
+- **Real P&L, not just balances** — every incoming movement opens a lot, every outgoing one closes
+  lots oldest-first. You get average cost, cost basis, unrealized and realized profit per asset —
+  the numbers a portfolio tracker exists for, computed across all your wallets at once.
 - **Watch-only by design** — you paste a public address, nothing else. Climb has no place to put a
   seed phrase or a private key, and it will refuse anything that looks like one.
 - **Your data never leaves your machine** — a Postgres container you own holds every wallet,
   transaction and setting. No account, no cloud, no telemetry.
-- **Built for spending, not just balances** — categories, automatic rules, internal-transfer
-  detection, monthly cash flow and a savings rate, the way a personal-finance app works.
+- **Built for spending too** — categories, automatic rules, internal-transfer detection, budgets
+  with pace tracking, savings goals and recurring-payment detection, the way a personal-finance
+  app works.
 - **Multi-chain from one screen** — eight networks, native coins, ERC-20 / TRC-20 stablecoins and
   SPL tokens in a single portfolio.
 - **Two themes, two languages** — dark and light, English and Russian, switched from the sidebar
@@ -46,12 +51,16 @@ cash flow, portfolio allocation and live conversion rates.
 
 <table>
 <tr>
-<td width="50%"><img src="docs/portfolio.png" alt="Portfolio" /><br /><sub><b>Portfolio</b> — holdings, allocation and net-worth trend</sub></td>
-<td width="50%"><img src="docs/analytics-light.png" alt="Analytics" /><br /><sub><b>Analytics</b> — light theme, Russian locale</sub></td>
+<td width="50%"><img src="docs/asset.png" alt="Asset page" /><br /><sub><b>Per-asset P&amp;L</b> — average cost, unrealized and realized profit, every open FIFO lot</sub></td>
+<td width="50%"><img src="docs/portfolio.png" alt="Portfolio" /><br /><sub><b>Portfolio</b> — holdings with cost basis, P&amp;L and allocation</sub></td>
+</tr>
+<tr>
+<td width="50%"><img src="docs/budgets.png" alt="Budgets" /><br /><sub><b>Budgets</b> — limits per category with a pace marker</sub></td>
+<td width="50%"><img src="docs/goals-light.png" alt="Goals" /><br /><sub><b>Goals</b> — light theme, Russian locale</sub></td>
 </tr>
 <tr>
 <td width="50%"><img src="docs/transactions.png" alt="Transactions" /><br /><sub><b>Transactions</b> — filters, inline categories, CSV export</sub></td>
-<td width="50%"><img src="docs/wallets.png" alt="Wallets" /><br /><sub><b>Wallets</b> — watch-only addresses with per-asset balances</sub></td>
+<td width="50%"><img src="docs/analytics-light.png" alt="Analytics" /><br /><sub><b>Analytics</b> — cash flow and structure</sub></td>
 </tr>
 </table>
 
@@ -107,11 +116,30 @@ market API is unreachable, so the dashboard never goes blank.
 - Spending donut with a ranked category list
 - Recent transactions with explorer links, top assets and a 90-day net-worth curve
 
-**Portfolio**
-- Total value, 24-hour change, allocation donut
-- Holdings table: amount, price, 24h, value, share
+**Portfolio & P&L**
+- Total value, invested (cost basis), unrealized and realized P&L at a glance
+- Holdings table: amount, average cost, price, value, unrealized P&L, share
 - Breakdown by network and by wallet
 - Optional dust filter for holdings worth under $1
+
+**Per-asset page** (click any holding)
+- What you hold, average cost, unrealized and realized P&L
+- Every open FIFO lot with its acquisition date, cost and current gain
+- 90-day price chart, which wallets hold it, and the asset's full history
+
+**Budgets**
+- A monthly or yearly limit per category
+- Progress bar with a pace marker — see instantly whether you are spending
+  faster than the month is passing
+- On track / close to the limit / over budget status per category
+
+**Goals**
+- Save toward a number of coins (0.25 BTC) or a portfolio value ($25 000)
+- Progress ring, deadline countdown, and the contribution needed per month to land on time
+
+**Recurring**
+- Repeating payments found automatically in your history — no setup
+- Interval, occurrence count, next expected date and the estimated monthly load
 
 **Transactions**
 - Filters by wallet, category, direction and full-text search over address, hash and note
@@ -175,6 +203,11 @@ The frontend talks to a plain REST API — handy for scripts and integrations.
 | `POST` | `/api/wallets/:id/sync` | Sync one wallet |
 | `GET` | `/api/transactions` | Filter, search, paginate |
 | `GET` | `/api/transactions/export.csv` | Full CSV export |
+| `GET` | `/api/assets` | Holdings with cost basis and P&L |
+| `GET` | `/api/assets/:symbol` | One asset: FIFO lots, wallets, history |
+| `GET` `POST` | `/api/planning/budgets` | Budgets with spend and pace |
+| `GET` `POST` | `/api/planning/goals` | Savings goals with progress |
+| `GET` | `/api/planning/recurring` | Detected recurring payments |
 | `GET` `POST` | `/api/categories` · `/api/rules` | Categories and rule engine |
 | `GET` | `/api/stats/summary` · `/categories` · `/cashflow` · `/portfolio` · `/networth` | Dashboard data |
 | `GET` | `/api/market/convert` · `/api/market/chart` | Rates and price history |
@@ -185,6 +218,9 @@ The frontend talks to a plain REST API — handy for scripts and integrations.
 ## Development
 
 ```bash
+# run the test suite (FIFO cost-basis engine)
+cd server && npm test
+
 # database only
 docker compose up -d db
 
@@ -198,8 +234,9 @@ cd web && npm install && npm run dev
 ```
 server/   Express + TypeScript API, chain adapters, sync scheduler
   src/chains/     one adapter per network, all behind a single interface
-  src/services/   sync, prices, categorisation, statistics
+  src/services/   sync, prices, categorisation, statistics, FIFO P&L, planning
   src/routes/     REST layer
+  test/           unit tests for the cost-basis engine
 web/      React + Vite dashboard
   src/i18n/       en.ts, ru.ts — add a file to add a language
   src/pages/      one file per screen

@@ -1,5 +1,6 @@
 import {
   Coins,
+  Flag,
   LayoutDashboard,
   Menu,
   Moon,
@@ -7,31 +8,62 @@ import {
   PanelLeftOpen,
   PieChart,
   Repeat,
+  RotateCw,
   Settings as SettingsIcon,
   Sun,
   Tags,
   TrendingUp,
   Wallet,
   Workflow,
+  Target,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { useApp } from '../app-context';
-import { useI18n, LOCALES, type LocaleCode } from '../i18n';
+import { useI18n, LOCALES, type LocaleCode, type TranslationKey } from '../i18n';
 import { useLocalStorage } from '../hooks';
 
-const NAV = [
-  { to: '/', key: 'nav.dashboard', icon: LayoutDashboard, end: true },
-  { to: '/portfolio', key: 'nav.portfolio', icon: Coins },
-  { to: '/analytics', key: 'nav.analytics', icon: PieChart },
-  { to: '/transactions', key: 'nav.transactions', icon: TrendingUp },
-  { to: '/wallets', key: 'nav.wallets', icon: Wallet },
-  { to: '/categories', key: 'nav.categories', icon: Tags },
-  { to: '/rules', key: 'nav.rules', icon: Workflow },
-  { to: '/convert', key: 'nav.convert', icon: Repeat },
-  { to: '/settings', key: 'nav.settings', icon: SettingsIcon },
-] as const;
+interface NavItem {
+  to: string;
+  key: TranslationKey;
+  icon: typeof LayoutDashboard;
+  end?: boolean;
+}
+
+/**
+ * Grouped so the sidebar reads as three jobs — see where you stand, manage the
+ * money, configure the instance — instead of one long undifferentiated list.
+ */
+const GROUPS: Array<{ label: TranslationKey; items: NavItem[] }> = [
+  {
+    label: 'nav.group.overview',
+    items: [
+      { to: '/', key: 'nav.dashboard', icon: LayoutDashboard, end: true },
+      { to: '/portfolio', key: 'nav.portfolio', icon: Coins },
+      { to: '/analytics', key: 'nav.analytics', icon: PieChart },
+    ],
+  },
+  {
+    label: 'nav.group.money',
+    items: [
+      { to: '/transactions', key: 'nav.transactions', icon: TrendingUp },
+      { to: '/budgets', key: 'nav.budgets', icon: Target },
+      { to: '/goals', key: 'nav.goals', icon: Flag },
+      { to: '/recurring', key: 'nav.recurring', icon: RotateCw },
+    ],
+  },
+  {
+    label: 'nav.group.manage',
+    items: [
+      { to: '/wallets', key: 'nav.wallets', icon: Wallet },
+      { to: '/categories', key: 'nav.categories', icon: Tags },
+      { to: '/rules', key: 'nav.rules', icon: Workflow },
+      { to: '/convert', key: 'nav.convert', icon: Repeat },
+      { to: '/settings', key: 'nav.settings', icon: SettingsIcon },
+    ],
+  },
+];
 
 export function Layout({ children }: { children: ReactNode }) {
   const { t, locale, setLocale } = useI18n();
@@ -51,19 +83,24 @@ export function Layout({ children }: { children: ReactNode }) {
             {!collapsed && <span>{t('app.name')}</span>}
           </div>
 
-          <nav style={{ display: 'grid', gap: 4 }}>
-            {NAV.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={'end' in item ? item.end : false}
-                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-                onClick={() => setMobileOpen(false)}
-                title={t(item.key)}
-              >
-                <item.icon size={18} />
-                {!collapsed && <span>{t(item.key)}</span>}
-              </NavLink>
+          <nav className="nav-groups">
+            {GROUPS.map((group) => (
+              <div key={group.label} className="nav-group">
+                {!collapsed && <div className="nav-group-label">{t(group.label)}</div>}
+                {group.items.map((item) => (
+                  <NavLink
+                    key={item.to}
+                    to={item.to}
+                    end={item.end ?? false}
+                    className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                    onClick={() => setMobileOpen(false)}
+                    title={t(item.key)}
+                  >
+                    <item.icon size={17} />
+                    {!collapsed && <span>{t(item.key)}</span>}
+                  </NavLink>
+                ))}
+              </div>
             ))}
           </nav>
 
@@ -73,19 +110,21 @@ export function Layout({ children }: { children: ReactNode }) {
               onClick={() => update({ theme: dark ? 'light' : 'dark' })}
               title={t('settings.theme')}
             >
-              {dark ? <Sun size={18} /> : <Moon size={18} />}
-              {!collapsed && <span>{dark ? t('settings.themeLight') : t('settings.themeDark')}</span>}
+              {dark ? <Sun size={17} /> : <Moon size={17} />}
+              {!collapsed && (
+                <span>{dark ? t('settings.themeLight') : t('settings.themeDark')}</span>
+              )}
             </button>
             <button
               className="nav-link"
               onClick={() => setLocale(locale === 'en' ? 'ru' : ('en' as LocaleCode))}
               title={t('settings.language')}
             >
-              <span style={{ fontSize: 16, lineHeight: 1 }}>{LOCALES[locale].flag}</span>
+              <span style={{ fontSize: 15, lineHeight: 1 }}>{LOCALES[locale].flag}</span>
               {!collapsed && <span>{LOCALES[locale].name}</span>}
             </button>
             <button className="nav-link" onClick={() => setCollapsed(!collapsed)}>
-              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+              {collapsed ? <PanelLeftOpen size={17} /> : <PanelLeftClose size={17} />}
               {!collapsed && <span>{t('nav.collapse')}</span>}
             </button>
           </div>

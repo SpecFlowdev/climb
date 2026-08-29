@@ -184,3 +184,90 @@ export interface Settings {
   privacyMode: boolean;
   [key: string]: unknown;
 }
+
+/* ------------------------- P&L and planning types ------------------------ */
+
+export interface Lot {
+  ts: string;
+  amount: number;
+  costPerUnit: number;
+}
+
+export interface AssetPosition {
+  asset: string;
+  amount: number;
+  price: number;
+  value: number;
+  change24h: number | null;
+  avgCost: number;
+  costBasis: number;
+  unrealized: number;
+  unrealizedPercent: number;
+  realized: number;
+  totalPnl: number;
+  bought: number;
+  sold: number;
+  txCount: number;
+  firstSeen: string | null;
+  lastActivity: string | null;
+  openLots: Lot[];
+  share?: number;
+}
+
+export interface AssetsResponse {
+  total: number;
+  costBasis: number;
+  unrealized: number;
+  realized: number;
+  assets: AssetPosition[];
+}
+
+export interface AssetDetail {
+  position: AssetPosition;
+  wallets: Array<{ label: string; chain: string; color: string; amount: number }>;
+  transactions: Transaction[];
+}
+
+export interface Budget {
+  id: number;
+  categoryId: number;
+  categoryName: string;
+  categoryNameRu: string | null;
+  color: string;
+  period: 'month' | 'year';
+  amount: number;
+  spent: number;
+  remaining: number;
+  usedPercent: number;
+  periodElapsedPercent: number;
+  status: 'ok' | 'warning' | 'over';
+}
+
+export interface Goal {
+  id: number;
+  title: string;
+  asset: string | null;
+  target: number;
+  current: number;
+  progressPercent: number;
+  currentValue: number;
+  targetValue: number;
+  deadline: string | null;
+  daysLeft: number | null;
+  color: string;
+  requiredPerMonth: number | null;
+  archived: boolean;
+}
+
+export interface Recurring {
+  counterparty: string;
+  asset: string;
+  categoryName: string | null;
+  categoryColor: string | null;
+  occurrences: number;
+  averageValue: number;
+  intervalDays: number;
+  lastSeen: string;
+  nextExpected: string;
+  monthlyEstimate: number;
+}

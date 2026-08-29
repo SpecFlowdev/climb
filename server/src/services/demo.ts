@@ -98,6 +98,33 @@ export async function seedDemoData(): Promise<boolean> {
     await recomputeBalances(walletId);
   }
 
+  const DEMO_BUDGETS: Array<[string, number]> = [
+    ['Shopping', 900],
+    ['Subscriptions', 400],
+    ['Food & Cafe', 300],
+    ['Hardware & Software', 1200],
+  ];
+  for (const [name, amount] of DEMO_BUDGETS) {
+    const id = categoryId.get(name);
+    if (!id) continue;
+    await query(
+      `INSERT INTO budgets (category_id, amount, period) VALUES ($1,$2,'month')
+       ON CONFLICT (category_id, period) DO NOTHING`,
+      [id, amount],
+    );
+  }
+
+  await query(
+    `INSERT INTO goals (title, asset, target, deadline, color)
+     VALUES ('Stack 0.25 BTC', 'BTC', 0.25, $1, '#f59e0b'),
+            ('Emergency fund', NULL, 25000, $2, '#3b82f6')
+     ON CONFLICT DO NOTHING`,
+    [
+      new Date(Date.now() + 210 * 86_400_000).toISOString().slice(0, 10),
+      new Date(Date.now() + 400 * 86_400_000).toISOString().slice(0, 10),
+    ],
+  );
+
   for (const row of DEMO_PRICES) {
     await query(
       `INSERT INTO prices (asset, currency, price, change_24h, updated_at)

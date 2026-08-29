@@ -1,10 +1,12 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { RefreshCw, Wallet } from 'lucide-react';
+import { Flag, RefreshCw, Wallet } from 'lucide-react';
 import {
   api,
+  type AssetsResponse,
+  type Budget,
   type CategoryStat,
-  type Portfolio,
+  type Goal,
   type SummaryResponse,
   type Transaction,
 } from '../api';
@@ -33,7 +35,12 @@ export function Dashboard() {
   const categories = useApi<CategoryStat[]>(`/stats/categories?direction=out&${suffix}`, [suffix]);
   const recent = useApi<{ items: Transaction[] }>('/transactions?limit=7&includeInternal=false');
   const networth = useApi<Array<{ date: string; value: number }>>('/stats/networth?days=90');
-  const portfolio = useApi<Portfolio>('/stats/portfolio');
+  const portfolio = useApi<AssetsResponse>('/assets');
+  const budgets = useApi<Budget[]>(`/planning/budgets?year=${period.year}&month=${period.month ?? 1}`, [
+    period.year,
+    period.month,
+  ]);
+  const goals = useApi<Goal[]>('/planning/goals');
 
   const current = summary.data?.current;
   const previous = summary.data?.previous;
@@ -215,20 +222,76 @@ export function Dashboard() {
             ) : (
               <div className="list">
                 {portfolio.data?.assets.slice(0, 6).map((asset) => (
-                  <div className="list-item" key={asset.asset}>
+                  <Link className="list-item" key={asset.asset} to={`/assets/${asset.asset}`}>
                     <span className="chip" style={{ background: 'var(--panel-3)' }}>
                       {asset.asset.slice(0, 3)}
                     </span>
                     <div style={{ flex: 1 }}>
                       <div className="title">{asset.asset}</div>
-                      <div className="meta">{asset.share.toFixed(1)}%</div>
+                      <div className="meta">{(asset.share ?? 0).toFixed(1)}%</div>
                     </div>
                     <div style={{ textAlign: 'right' }}>
                       <Money className="amount">{formatMoney(asset.value, currency)}</Money>
-                      <div
-                        className={`meta ${(asset.change24h ?? 0) >= 0 ? 'pos' : 'neg'}`}
-                      >
-                        {formatPercent(asset.change24h)}
+                      <div className={`meta ${asset.unrealized >= 0 ? 'pos' : 'neg'}`}>
+                        {asset.unrealized >= 0 ? '+' : ''}
+                        {formatMoney(asset.unrealized, currency)}
+                      </div>
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            )}
+          </Card>
+
+          <Card title={t('dash.netWorth')}>
+            {networth.loading ? <Skeleton height={240} /> : <TrendArea data={trend} />}
+          </Card>
+        </div>
+
+        <div className="grid split">
+          <Card
+            title={t('budget.title')}
+            action={
+              <Link className="btn ghost" to="/budgets">
+                {t('common.all')}
+              </Link>
+            }
+          >
+            {(budgets.data?.length ?? 0) === 0 ? (
+              <EmptyState
+                title={t('budget.empty')}
+                hint={t('budget.emptyHint')}
+                action={
+                  <Link className="btn primary" to="/budgets">
+                    {t('budget.add')}
+                  </Link>
+                }
+              />
+            ) : (
+              <div className="list">
+                {budgets.data?.slice(0, 5).map((budget) => (
+                  <div className="list-item" key={budget.id}>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="row between">
+                        <span className="title" style={{ fontSize: 13 }}>
+                          {categoryLabel(locale, budget.categoryName, budget.categoryNameRu)}
+                        </span>
+                        <span className="hint">
+                          <Money>{formatMoney(budget.spent, currency)}</Money> /{' '}
+                          <Money>{formatMoney(budget.amount, currency)}</Money>
+                        </span>
+                      </div>
+                      <div style={{ marginTop: 7 }}>
+                        <Progress
+                          value={budget.usedPercent}
+                          color={
+                            budget.status === 'over'
+                              ? 'var(--danger)'
+                              : budget.status === 'warning'
+                                ? 'var(--warn)'
+                                : 'var(--accent)'
+                          }
+                        />
                       </div>
                     </div>
                   </div>
@@ -237,8 +300,49 @@ export function Dashboard() {
             )}
           </Card>
 
-          <Card title={t('dash.netWorth')}>
-            {networth.loading ? <Skeleton height={240} /> : <TrendArea data={trend} />}
+          <Card
+            title={t('goal.title')}
+            action={
+              <Link className="btn ghost" to="/goals">
+                {t('common.all')}
+              </Link>
+            }
+          >
+            {(goals.data?.length ?? 0) === 0 ? (
+              <EmptyState
+                title={t('goal.empty')}
+                hint={t('goal.emptyHint')}
+                action={
+                  <Link className="btn primary" to="/goals">
+                    {t('goal.add')}
+                  </Link>
+                }
+              />
+            ) : (
+              <div className="list">
+                {goals.data?.slice(0, 4).map((goal) => (
+                  <div className="list-item" key={goal.id}>
+                    <span
+                      className="chip"
+                      style={{ background: `${goal.color}22`, color: goal.color }}
+                    >
+                      <Flag size={15} />
+                    </span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="row between">
+                        <span className="title" style={{ fontSize: 13 }}>
+                          {goal.title}
+                        </span>
+                        <span className="hint">{goal.progressPercent.toFixed(0)}%</span>
+                      </div>
+                      <div style={{ marginTop: 7 }}>
+                        <Progress value={goal.progressPercent} color={goal.color} />
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         </div>
       </div>
