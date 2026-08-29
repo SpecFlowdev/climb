@@ -146,7 +146,13 @@ button.nav-link {
 .nav-link.active { background: var(--panel-3); color: var(--text); }
 .nav-link svg { flex: none; }
 
-.sidebar-footer { margin-top: auto; display: grid; gap: 6px; }
+.sidebar-footer {
+  margin-top: 18px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+  display: grid;
+  gap: 6px;
+}
 
 .content { display: flex; flex-direction: column; min-width: 0; }
 
