@@ -110,21 +110,21 @@ CREATE TABLE IF NOT EXISTS settings (
 
 const DEFAULT_CATEGORIES: Array<[string, string, string, string, string]> = [
   // name, name_ru, kind, color, icon
-  ['Salary & Payroll', 'Зарплата', 'income', '#2ecc8f', 'wallet'],
-  ['Trading Profit', 'Доход от торговли', 'income', '#39d98a', 'trending-up'],
-  ['Staking & Rewards', 'Стейкинг и награды', 'income', '#4bc9f0', 'sparkles'],
-  ['Airdrop', 'Аирдроп', 'income', '#9b8cff', 'gift'],
-  ['Refund', 'Возврат', 'income', '#61d6b4', 'undo'],
-  ['Exchange Deposit', 'Пополнение биржи', 'transfer', '#5b8def', 'exchange'],
-  ['Internal Transfer', 'Внутренний перевод', 'transfer', '#7a8699', 'shuffle'],
-  ['Fees & Gas', 'Комиссии и газ', 'expense', '#f2994a', 'fuel'],
-  ['Shopping', 'Покупки', 'expense', '#f2c94c', 'bag'],
-  ['Food & Cafe', 'Еда и кафе', 'expense', '#eb5757', 'utensils'],
-  ['Subscriptions', 'Подписки', 'expense', '#bb6bd9', 'repeat'],
-  ['Hardware & Software', 'Техника и софт', 'expense', '#56ccf2', 'cpu'],
-  ['Investments', 'Инвестиции', 'expense', '#2ecc8f', 'chart'],
-  ['Withdrawal', 'Вывод средств', 'expense', '#7a8699', 'bank'],
-  ['Other', 'Другое', 'expense', '#8a94a6', 'dots'],
+  ['Salary & Payroll', 'Зарплата', 'income', '#34d399', 'wallet'],
+  ['Trading Profit', 'Доход от торговли', 'income', '#10b981', 'trending-up'],
+  ['Staking & Rewards', 'Стейкинг и награды', 'income', '#22d3ee', 'sparkles'],
+  ['Airdrop', 'Аирдроп', 'income', '#a855f7', 'gift'],
+  ['Refund', 'Возврат', 'income', '#2dd4bf', 'undo'],
+  ['Exchange Deposit', 'Пополнение биржи', 'transfer', '#3b82f6', 'exchange'],
+  ['Internal Transfer', 'Внутренний перевод', 'transfer', '#94a3b8', 'shuffle'],
+  ['Fees & Gas', 'Комиссии и газ', 'expense', '#f97316', 'fuel'],
+  ['Shopping', 'Покупки', 'expense', '#f59e0b', 'bag'],
+  ['Food & Cafe', 'Еда и кафе', 'expense', '#f0555c', 'utensils'],
+  ['Subscriptions', 'Подписки', 'expense', '#a855f7', 'repeat'],
+  ['Hardware & Software', 'Техника и софт', 'expense', '#3b82f6', 'cpu'],
+  ['Investments', 'Инвестиции', 'expense', '#34d399', 'chart'],
+  ['Withdrawal', 'Вывод средств', 'expense', '#ec4899', 'bank'],
+  ['Other', 'Другое', 'expense', '#94a3b8', 'dots'],
 ];
 
 export async function migrate(): Promise<void> {
@@ -133,7 +133,9 @@ export async function migrate(): Promise<void> {
     await pool.query(
       `INSERT INTO categories (name, name_ru, kind, color, icon, system)
        VALUES ($1,$2,$3,$4,$5,TRUE)
-       ON CONFLICT (name, kind) DO NOTHING`,
+       ON CONFLICT (name, kind) DO UPDATE
+         SET name_ru = EXCLUDED.name_ru, color = EXCLUDED.color, icon = EXCLUDED.icon
+         WHERE categories.system = TRUE`,
       [name, nameRu, kind, color, icon],
     );
   }

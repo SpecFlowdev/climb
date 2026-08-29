@@ -69,14 +69,14 @@ export function relativeTime(value: string | null, locale: string): string {
 }
 
 export const CHART_COLORS = [
-  '#2ecc8f',
-  '#5b8def',
-  '#9b8cff',
-  '#f2c94c',
-  '#ef5f6b',
-  '#4bc9f0',
-  '#f2994a',
-  '#61d6b4',
-  '#bb6bd9',
-  '#7a8699',
+  '#34d399',
+  '#3b82f6',
+  '#a855f7',
+  '#f59e0b',
+  '#f0555c',
+  '#22d3ee',
+  '#f97316',
+  '#10b981',
+  '#ec4899',
+  '#94a3b8',
 ];

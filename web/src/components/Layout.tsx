@@ -42,51 +42,53 @@ export function Layout({ children }: { children: ReactNode }) {
 
   return (
     <div className={`app ${collapsed ? 'collapsed' : ''}`}>
-      <aside className={`sidebar ${mobileOpen ? 'open' : ''}`}>
-        <div className="brand">
-          <span className="brand-mark">
-            <TrendingUp size={18} />
-          </span>
-          {!collapsed && <span>{t('app.name')}</span>}
-        </div>
+      <aside className={`sidebar-col ${mobileOpen ? 'open' : ''}`}>
+        <div className="sidebar">
+          <div className="brand">
+            <span className="brand-mark">
+              <TrendingUp size={18} />
+            </span>
+            {!collapsed && <span>{t('app.name')}</span>}
+          </div>
 
-        <nav style={{ display: 'grid', gap: 4 }}>
-          {NAV.map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={'end' in item ? item.end : false}
-              className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
-              onClick={() => setMobileOpen(false)}
-              title={t(item.key)}
+          <nav style={{ display: 'grid', gap: 4 }}>
+            {NAV.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={'end' in item ? item.end : false}
+                className={({ isActive }) => `nav-link ${isActive ? 'active' : ''}`}
+                onClick={() => setMobileOpen(false)}
+                title={t(item.key)}
+              >
+                <item.icon size={18} />
+                {!collapsed && <span>{t(item.key)}</span>}
+              </NavLink>
+            ))}
+          </nav>
+
+          <div className="sidebar-footer">
+            <button
+              className="nav-link"
+              onClick={() => update({ theme: dark ? 'light' : 'dark' })}
+              title={t('settings.theme')}
             >
-              <item.icon size={18} />
-              {!collapsed && <span>{t(item.key)}</span>}
-            </NavLink>
-          ))}
-        </nav>
-
-        <div className="sidebar-footer">
-          <button
-            className="nav-link"
-            onClick={() => update({ theme: dark ? 'light' : 'dark' })}
-            title={t('settings.theme')}
-          >
-            {dark ? <Sun size={18} /> : <Moon size={18} />}
-            {!collapsed && <span>{dark ? t('settings.themeLight') : t('settings.themeDark')}</span>}
-          </button>
-          <button
-            className="nav-link"
-            onClick={() => setLocale(locale === 'en' ? 'ru' : ('en' as LocaleCode))}
-            title={t('settings.language')}
-          >
-            <span style={{ fontSize: 16, lineHeight: 1 }}>{LOCALES[locale].flag}</span>
-            {!collapsed && <span>{LOCALES[locale].name}</span>}
-          </button>
-          <button className="nav-link" onClick={() => setCollapsed(!collapsed)}>
-            {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
-            {!collapsed && <span>{t('nav.collapse')}</span>}
-          </button>
+              {dark ? <Sun size={18} /> : <Moon size={18} />}
+              {!collapsed && <span>{dark ? t('settings.themeLight') : t('settings.themeDark')}</span>}
+            </button>
+            <button
+              className="nav-link"
+              onClick={() => setLocale(locale === 'en' ? 'ru' : ('en' as LocaleCode))}
+              title={t('settings.language')}
+            >
+              <span style={{ fontSize: 16, lineHeight: 1 }}>{LOCALES[locale].flag}</span>
+              {!collapsed && <span>{LOCALES[locale].name}</span>}
+            </button>
+            <button className="nav-link" onClick={() => setCollapsed(!collapsed)}>
+              {collapsed ? <PanelLeftOpen size={18} /> : <PanelLeftClose size={18} />}
+              {!collapsed && <span>{t('nav.collapse')}</span>}
+            </button>
+          </div>
         </div>
       </aside>
 
