@@ -1,0 +1,39 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-climb}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-climb}
+      POSTGRES_DB: ${POSTGRES_DB:-climb}
+    volumes:
+      - climb-db:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER:-climb} -d ${POSTGRES_DB:-climb}']
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://${POSTGRES_USER:-climb}:${POSTGRES_PASSWORD:-climb}@db:5432/${POSTGRES_DB:-climb}
+      PORT: 8080
+      BASE_CURRENCY: ${BASE_CURRENCY:-usd}
+      SYNC_INTERVAL_MINUTES: ${SYNC_INTERVAL_MINUTES:-15}
+      MAX_TX_PER_SYNC: ${MAX_TX_PER_SYNC:-200}
+      PRICE_TTL_SECONDS: ${PRICE_TTL_SECONDS:-300}
+      DEMO_MODE: ${DEMO_MODE:-false}
+      COINGECKO_API_KEY: ${COINGECKO_API_KEY:-}
+      ETHERSCAN_API_KEY: ${ETHERSCAN_API_KEY:-}
+      TRONGRID_API_KEY: ${TRONGRID_API_KEY:-}
+      SOLANA_RPC_URL: ${SOLANA_RPC_URL:-https://api.mainnet-beta.solana.com}
+    ports:
+      - '${APP_PORT:-8080}:8080'
+
+volumes:
+  climb-db:
