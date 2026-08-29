@@ -132,11 +132,11 @@ CREATE TABLE IF NOT EXISTS settings (
 const DEFAULT_CATEGORIES: Array<[string, string, string, string, string]> = [
   // name, name_ru, kind, color, icon
   ['Salary & Payroll', 'Зарплата', 'income', '#34d399', 'wallet'],
-  ['Trading Profit', 'Доход от торговли', 'income', '#10b981', 'trending-up'],
+  ['Trading Profit', 'Доход от торговли', 'income', '#3b82f6', 'trending-up'],
   ['Staking & Rewards', 'Стейкинг и награды', 'income', '#22d3ee', 'sparkles'],
   ['Airdrop', 'Аирдроп', 'income', '#a855f7', 'gift'],
-  ['Refund', 'Возврат', 'income', '#2dd4bf', 'undo'],
-  ['Exchange Deposit', 'Пополнение биржи', 'transfer', '#3b82f6', 'exchange'],
+  ['Refund', 'Возврат', 'income', '#f59e0b', 'undo'],
+  ['Exchange Deposit', 'Пополнение биржи', 'transfer', '#22d3ee', 'exchange'],
   ['Internal Transfer', 'Внутренний перевод', 'transfer', '#94a3b8', 'shuffle'],
   ['Fees & Gas', 'Комиссии и газ', 'expense', '#f97316', 'fuel'],
   ['Shopping', 'Покупки', 'expense', '#f59e0b', 'bag'],

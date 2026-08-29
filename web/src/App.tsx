@@ -7,6 +7,7 @@ import { BudgetsPage } from './pages/Budgets';
 import { CategoriesPage } from './pages/Categories';
 import { ConvertPage } from './pages/Convert';
 import { GoalsPage } from './pages/Goals';
+import { MoneyMapPage } from './pages/MoneyMap';
 import { RecurringPage } from './pages/Recurring';
 import { Dashboard } from './pages/Dashboard';
 import { PortfolioPage } from './pages/Portfolio';
@@ -22,6 +23,7 @@ export function App() {
         <Route path="/" element={<Dashboard />} />
         <Route path="/portfolio" element={<PortfolioPage />} />
         <Route path="/analytics" element={<AnalyticsPage />} />
+        <Route path="/map" element={<MoneyMapPage />} />
         <Route path="/assets/:symbol" element={<AssetDetailPage />} />
         <Route path="/budgets" element={<BudgetsPage />} />
         <Route path="/goals" element={<GoalsPage />} />

@@ -271,3 +271,30 @@ export interface Recurring {
   nextExpected: string;
   monthlyEstimate: number;
 }
+
+export interface MapLeaf {
+  id: string;
+  label: string;
+  value: number;
+  count: number;
+  isOther: boolean;
+}
+
+export interface MapBranch {
+  id: string;
+  categoryId: number | null;
+  label: string;
+  labelRu: string | null;
+  color: string;
+  value: number;
+  count: number;
+  share: number;
+  children: MapLeaf[];
+}
+
+export interface MoneyMap {
+  direction: 'in' | 'out';
+  total: number;
+  transactions: number;
+  branches: MapBranch[];
+}

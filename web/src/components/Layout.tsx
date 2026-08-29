@@ -6,6 +6,7 @@ import {
   Moon,
   PanelLeftClose,
   PanelLeftOpen,
+  Network,
   PieChart,
   Repeat,
   RotateCw,
@@ -42,6 +43,7 @@ const GROUPS: Array<{ label: TranslationKey; items: NavItem[] }> = [
       { to: '/', key: 'nav.dashboard', icon: LayoutDashboard, end: true },
       { to: '/portfolio', key: 'nav.portfolio', icon: Coins },
       { to: '/analytics', key: 'nav.analytics', icon: PieChart },
+      { to: '/map', key: 'nav.map', icon: Network },
     ],
   },
   {

@@ -10,8 +10,8 @@
 
 Connect any **public** address — Bitcoin, Ethereum, Polygon, Arbitrum, Base, Optimism, TRON, Solana —
 and Climb turns raw on-chain activity into a finance dashboard: **FIFO cost basis and realized /
-unrealized P&L**, spending by category, budgets, savings goals, detected recurring payments,
-cash flow and live conversion rates.
+unrealized P&L**, an interactive **money map** of where everything went, budgets, savings goals,
+detected recurring payments, cash flow and live conversion rates.
 
 <img alt="Docker" src="https://img.shields.io/badge/Docker-ready-2ecc8f?style=flat-square&logo=docker&logoColor=white" />
 <img alt="PostgreSQL" src="https://img.shields.io/badge/PostgreSQL-16-5b8def?style=flat-square&logo=postgresql&logoColor=white" />
@@ -44,6 +44,16 @@ cash flow and live conversion rates.
 - **Two themes, two languages** — dark and light, English and Russian, switched from the sidebar
   and remembered per instance. New languages are one file.
 - **One command to run** — `docker compose up -d`, and the dashboard is on `localhost:8080`.
+
+---
+
+<div align="center">
+
+<img src="docs/moneymap.png" alt="Money map" width="92%" />
+
+<sub><b>The money map</b> — every category and counterparty of a period on one canvas</sub>
+
+</div>
 
 ---
 
@@ -153,6 +163,15 @@ market API is unreachable, so the dashboard never goes blank.
   `contains` / `equals` / `starts with`, ordered by priority
 - Re-apply rules to the whole history in one click; manual overrides are preserved
 
+**Money map**
+- A radial map of a period: the centre is the total, the first ring the
+  categories, the outer ring the counterparties inside each of them
+- Link thickness is the amount flowing through it, so the shape of your
+  spending is visible before you read a single number
+- Hover isolates a branch; click a category to open its transactions, click a
+  counterparty dot to filter by it
+- Switch between expenses and income with one toggle
+
 **Analytics**
 - Monthly income vs expenses bars, net-flow line
 - Income and expense structure donuts
@@ -203,6 +222,7 @@ The frontend talks to a plain REST API — handy for scripts and integrations.
 | `POST` | `/api/wallets/:id/sync` | Sync one wallet |
 | `GET` | `/api/transactions` | Filter, search, paginate |
 | `GET` | `/api/transactions/export.csv` | Full CSV export |
+| `GET` | `/api/stats/map` | Money-map tree: categories and counterparties |
 | `GET` | `/api/assets` | Holdings with cost basis and P&L |
 | `GET` | `/api/assets/:symbol` | One asset: FIFO lots, wallets, history |
 | `GET` `POST` | `/api/planning/budgets` | Budgets with spend and pace |

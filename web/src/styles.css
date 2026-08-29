@@ -553,3 +553,85 @@ button.nav-link {
 
 a.list-item { color: inherit; cursor: pointer; }
 a.list-item:hover .title { color: var(--accent); }
+
+/* ------------------------------ money map -------------------------------- */
+
+.moneymap { width: 100%; }
+.moneymap svg { width: 100%; height: auto; display: block; overflow: visible; }
+
+.mm-ring {
+  fill: none;
+  stroke: var(--line);
+  stroke-dasharray: 2 7;
+  opacity: 0.5;
+}
+.mm-ring.faint { opacity: 0.25; }
+
+.mm-branch { cursor: pointer; transition: opacity 0.2s ease; }
+.mm-branch.dim { opacity: 0.16; }
+
+.mm-node {
+  stroke: var(--panel);
+  stroke-width: 3;
+  transition: r 0.2s ease;
+}
+.mm-branch:hover .mm-node { stroke: var(--text); }
+
+.mm-node-value {
+  font-size: 11px;
+  font-weight: 700;
+  fill: #06120d;
+  pointer-events: none;
+}
+
+/* A halo in the panel colour keeps every label readable where it crosses a link. */
+.mm-branch-label,
+.mm-branch-value,
+.mm-leaf-label {
+  paint-order: stroke fill;
+  stroke: var(--panel);
+  stroke-width: 4px;
+  stroke-linejoin: round;
+}
+
+.mm-branch-label {
+  font-size: 14px;
+  font-weight: 600;
+  fill: var(--text);
+}
+.mm-branch-value {
+  font-size: 12px;
+  fill: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.mm-leaf-label {
+  font-size: 11.5px;
+  fill: var(--muted);
+  stroke-width: 3px;
+}
+.mm-leaf circle { cursor: pointer; transition: r 0.15s ease; }
+.mm-leaf:hover circle { r: 9; }
+.mm-leaf:hover .mm-leaf-label { fill: var(--text); }
+
+.mm-hub {
+  fill: var(--panel-2);
+  stroke: var(--line);
+  stroke-width: 1.5;
+}
+.mm-hub-label {
+  font-size: 10.5px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  fill: var(--muted);
+  font-weight: 650;
+}
+.mm-hub-value {
+  font-size: 20px;
+  font-weight: 700;
+  fill: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Invisible, generous hit targets — the drawn strokes are far too thin to aim at. */
+.mm-hit { stroke: transparent; cursor: pointer; }
+.mm-hit-dot { fill: transparent; cursor: pointer; }

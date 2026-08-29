@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { moneyMap } from '../services/moneymap.js';
 import * as stats from '../services/stats.js';
 
 export const statsRouter = Router();
@@ -49,6 +50,12 @@ statsRouter.get('/portfolio', async (_req, res) => {
 statsRouter.get('/networth', async (req, res) => {
   const days = Math.min(Math.max(Number(req.query.days) || 90, 7), 365);
   res.json(await stats.netWorthSeries(days));
+});
+
+statsRouter.get('/map', async (req, res) => {
+  const { year, month } = period(req);
+  const direction = req.query.direction === 'in' ? 'in' : 'out';
+  res.json(await moneyMap(year, month, direction));
 });
 
 statsRouter.get('/years', async (req, res) => {

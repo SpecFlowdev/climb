@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Download, ExternalLink, Plus, Search, Trash2 } from 'lucide-react';
 import { api, type Category, type Transaction, type Wallet } from '../api';
 import { useApp } from '../app-context';
@@ -14,12 +15,14 @@ const PAGE_SIZE = 50;
 export function TransactionsPage() {
   const { t, locale } = useI18n();
   const { currency, toast } = useApp();
+  // The money map links here with a category or counterparty already chosen.
+  const [searchParams] = useSearchParams();
   const [filters, setFilters] = useState({
-    search: '',
-    direction: '',
-    walletId: '',
-    categoryId: '',
-    asset: '',
+    search: searchParams.get('search') ?? '',
+    direction: searchParams.get('direction') ?? '',
+    walletId: searchParams.get('walletId') ?? '',
+    categoryId: searchParams.get('categoryId') ?? '',
+    asset: searchParams.get('asset') ?? '',
     hideInternal: true,
   });
   const [page, setPage] = useState(0);
